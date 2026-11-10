@@ -1,50 +1,63 @@
 # Wendy's Dash for Linux and Steam Deck
 
-The native Linux GUI applies the same hold-X-to-run modification as the Windows patcher. It targets **Linux x86-64**, including Steam Deck in **Desktop Mode**, and patches the Windows Steam game installed for use through Proton.
+**`WendysDash.sh` is the entire Linux patcher.** It has simple Apply/Undo dialogs and detects Wendy Quest on internal storage and SD cards. No installer, .NET runtime, pip packages, administrator password, or SteamOS system changes are needed. It uses Bash and Python 3's standard library, plus KDialog or Zenity for desktop dialogs. Without a dialog tool, it offers text prompts in Konsole.
 
-The .NET runtime is included. You do not need to install .NET, use an administrator password, or disable SteamOS's read-only system protection. Normal desktop graphics libraries are still required.
+## Use on Steam Deck
 
-## Steam Deck steps
+1. Close Wendy Quest and switch to **Desktop Mode**.
+2. Download **`WendysDash.sh`** into Downloads.
+3. Open **Konsole** and run:
 
-1. Close Wendy Quest. Switch your Deck to **Desktop Mode**.
-2. Download `WendysDash-1.1.0-linux-x64.tar.gz` and extract it into a folder in your home directory, such as Downloads.
-3. Open the extracted folder and launch **`WendysDash`**. Keep the other files beside it. The `Launch-WendysDash.sh` script also starts the app.
-4. Confirm the detected game folder or use **Browse**. Auto-detection checks Steam's internal library, `libraryfolders.vdf`, SD-card mount roots, and the Flatpak Steam location.
-5. Click **Apply patch**, close the patcher, and return to Gaming Mode. Launch the game normally through Steam.
-6. Hold the Deck's **X** button to run; release it to walk. Your Steam Input layout should send the standard gamepad X button. Keyboard Shift also works.
+   ```sh
+   bash ~/Downloads/WendysDash.sh
+   ```
 
-To undo, close the game, open the patcher in Desktop Mode, and click **Undo patch**. The Windows and Linux patchers recognize the same patch format.
+4. Check the detected game folder, then choose **Apply patch**. If the game isn't found, a folder picker opens.
+5. Return to Gaming Mode and launch Wendy Quest normally. **Hold X to run; release it to walk.** Keyboard Shift also works.
 
-If the file manager does not treat the launcher as executable, open its **Properties → Permissions** and enable execution. For a terminal launch from the extracted folder:
+After downloading, you can also enable **Properties → Permissions → Is executable** and run the script from Dolphin. The small `.tar.gz` download preserves the script's executable permission when extracted.
 
-```sh
-./WendysDash
-```
+To undo, close the game and run the same script again. It offers **Undo patch** when the patch is installed. The script recognizes patches made by the Windows application too.
 
-## Finding the game manually
+## Find the game manually
 
-In Steam's Desktop Mode library, open Wendy Quest's properties and use **Installed Files → Browse**. Select that folder in the patcher. A typical internal path is:
+In Steam's Desktop Mode library, open Wendy Quest's **Properties → Installed Files → Browse**. Choose that game folder, containing `package.nw`. An internal library typically uses:
 
 ```text
 /home/deck/.local/share/Steam/steamapps/common/Wendy Quest
 ```
 
-An SD card usually lives under `/run/media/`. Choose the actual game folder containing `package.nw`, not its Proton compatibility-data folder.
+SD cards commonly mount under `/run/media/`. Select the actual game directory, not the Proton `compatdata` folder. Auto-detection checks internal, custom, SD-card, and Flatpak Steam libraries.
 
-## Backups and compatibility
+## Troubleshooting
 
-Backups are stored beside `package.nw/js/plugins/MapScene.js`, with a content hash in each filename. The activity panel shows the exact path. Save files are never read or edited. Steam updates and file verification may replace the patch; run the patcher again afterward if it reports **Ready to patch**.
+- **No dialogs:** run `bash ~/Downloads/WendysDash.sh --terminal` for text prompts.
+- **Python 3 missing:** the script stops without changing any files. Other Linux distributions need Python 3 installed; no extra Python packages are used.
+- **Game running:** close Wendy Quest before applying or undoing. The script checks Proton/Wine process arguments too.
+- **No change to X:** your Steam Input layout must send the normal gamepad X button. Steam file verification or a game update may remove the patch; rerun the script if it says it is ready to apply.
 
-The Linux build includes automated patch tests, library-discovery tests, Proton-process matching checks, and a GUI apply/undo smoke test on an Ubuntu CI runner. **It has not been tested on a physical Steam Deck.** Treat it as a Steam Deck candidate until that hardware check is complete. This utility does not establish whether the underlying game works with a particular Proton version.
+The script creates verified backups beside `package.nw/js/plugins/MapScene.js` and shows their locations after each change. Save files are never read or edited. A modified patch block or incompatible movement code is refused instead of overwritten.
 
-For other Linux desktops, Avalonia requires X11/XWayland and desktop libraries such as libX11, libICE, libSM, and fontconfig. See [Avalonia's Linux deployment documentation](https://docs.avaloniaui.net/docs/deployment/linux). Valve documents how [Proton runs Windows games on SteamOS](https://partner.steamgames.com/doc/steamhardware/proton).
-
-## Build on Linux
-
-Install the .NET 10 SDK, then run:
+## Command-line options
 
 ```sh
-bash linux/package.sh
+bash WendysDash.sh --game-dir "/path/to/Wendy Quest" --status
+bash WendysDash.sh --game-dir "/path/to/Wendy Quest" --apply
+bash WendysDash.sh --game-dir "/path/to/Wendy Quest" --undo
 ```
 
-The script runs shared and Linux-specific tests, publishes a self-contained `linux-x64` app, and produces the `.tar.gz` and checksum in `artifacts/`. If `xvfb-run` is available, it also verifies the GUI against synthetic game files. CI requires this GUI check. No actual game files are needed for tests or included in the download.
+These explicit commands print their results directly and do not open dialogs. `--status` does not write anything.
+
+## Testing
+
+The script is tested through Bash on an Ubuntu CI runner using synthetic game files. Checks cover apply/undo, Windows patch compatibility, backups, conflicting edits, file locks, running-game guards, Steam library discovery, and dialog action/cancellation behavior. **A physical Steam Deck has not been tested yet.** The script does not establish the game's compatibility with a particular Proton version.
+
+Run the tests on Linux with:
+
+```sh
+bash -n linux/WendysDash.sh
+python3 linux/test_script.py
+```
+
+The app does not connect to the network or include any game files.
+

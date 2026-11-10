@@ -1,15 +1,20 @@
-# Wendy's Dash v1.1.0 — Linux and Steam Deck candidate
+# Wendy's Dash v1.1.0 — Linux and Steam Deck
 
-Adds a native Linux x86-64 GUI for Steam Deck's Desktop Mode and other Linux desktops.
+A small, single-file Linux patcher: **`WendysDash.sh`**.
 
-- Detect Steam libraries on internal storage and SD cards, including custom libraries and Flatpak Steam.
-- Apply and undo the same hold-X-to-run patch used by the Windows version.
-- Detect Wendy Quest running through Proton before changing files.
-- Bundle .NET so users can extract and launch the app without installing a runtime.
-- Keep verified backups and preserve save files.
+- Run in Steam Deck's Desktop Mode and choose **Apply patch**. Hold X in-game to run; release to walk.
+- Auto-detect internal, SD-card, custom, and Flatpak Steam libraries.
+- Undo by running the same script again. Windows and Linux use the same patch format.
+- Keep verified backups and leave save files untouched.
+- No installer, .NET download, or administrator access. Uses Bash, Python 3, and optional KDialog/Zenity dialogs; text prompts also work.
 
-Download **`WendysDash-1.1.0-linux-x64.tar.gz`**, extract it, and run **`WendysDash`** in Desktop Mode. Keep its supporting files in the same directory. See `STEAM_DECK.md` in the archive for instructions.
+Download `WendysDash.sh`, open Konsole, and run:
 
-The Linux package is checked on Ubuntu CI with patch tests, Steam-library discovery checks, and a GUI apply/undo smoke test. **Physical Steam Deck testing is still needed.** This does not certify the game's Proton compatibility.
+```sh
+bash ~/Downloads/WendysDash.sh
+```
 
-This is an unofficial community patch. No game files are distributed.
+Alternatively, extract `WendysDash-1.1.0-linux.tar.gz` and run the executable script inside. Windows users should download **`WendyQuestDashPatcher.exe`**.
+
+Automated Linux tests pass. **Physical Steam Deck testing is still needed.** No game files are distributed.
+

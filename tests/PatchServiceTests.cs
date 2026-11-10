@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-#if !LINUX_TESTS
 using System.Windows.Forms;
-#endif
 using WendysDash;
 
 internal static class PatchServiceTests
@@ -17,7 +15,6 @@ internal static class PatchServiceTests
     {
         try
         {
-#if !LINUX_TESTS
             if (args.Length == 1 && args[0] == "--ui")
             {
                 using (Fixture f = new Fixture(Map)) {
@@ -27,7 +24,6 @@ internal static class PatchServiceTests
                 }
                 return 0;
             }
-#endif
             Test("apply, backup, repeat apply, and exact undo", delegate {
                 using (Fixture f = new Fixture(Map)) {
                     PatchResult applied = f.Service.Apply(f.Root);
@@ -123,9 +119,6 @@ internal static class PatchServiceTests
                     Check(File.ReadAllText(f.Target) == Map, "Locked file changed");
                 }
             });
-#if LINUX_TESTS
-            LinuxTests.Run();
-#endif
             Console.WriteLine("Passed " + passed + " shared patch checks.");
             return 0;
         }

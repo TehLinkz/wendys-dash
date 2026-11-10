@@ -13,13 +13,13 @@ An unofficial community project. Not affiliated with or endorsed by Wendy's or t
 
 To remove the change, close the game, reopen the patcher, and click **Undo patch**.
 
-The application runs locally. It has no installer, telemetry, or network requests. The Linux archive includes .NET and the Avalonia GUI libraries.
+The application runs locally. It has no installer, telemetry, or network requests.
 
 ## Linux and Steam Deck
 
-A native Linux x86-64 build is available from the successful **WendysDash-linux-x64** artifact on the repository's [Actions page](https://github.com/TehLinkz/wendys-dash/actions). It is packaged as `WendysDash-1.1.0-linux-x64.tar.gz`, with the .NET runtime included. Use it in Steam Deck's Desktop Mode. See [the Steam Deck guide](docs/STEAM_DECK.md) for extraction, launch, and SD-card instructions.
+Download the single-file [`WendysDash.sh`](https://raw.githubusercontent.com/TehLinkz/wendys-dash/main/linux/WendysDash.sh) script. In Steam Deck's Desktop Mode, run `bash ~/Downloads/WendysDash.sh` from Konsole, then choose **Apply patch**. It uses system Python 3 and KDialog/Zenity for simple dialogs, with text prompts as a fallback. No .NET bundle or extra Python packages are needed.
 
-The Linux GUI is tested on Ubuntu CI. Physical Steam Deck testing is still needed. Release publication is manual so the publisher can be **TehLinkz**.
+A packaged script with instructions and checksums is also available in the successful **WendysDash-linux** artifact on [Actions](https://github.com/TehLinkz/wendys-dash/actions). See [the Steam Deck guide](docs/STEAM_DECK.md) for details. Automated tests run on Ubuntu; physical Steam Deck testing is still needed. Release publication is manual so the publisher can be **TehLinkz**.
 
 ## Features
 
@@ -63,7 +63,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Test -Package
 
 The build script uses the Windows .NET Framework C# compiler, builds the GUI, runs the checks, and creates the release ZIP in `artifacts/`. The execution-policy override applies only to this process.
 
-Alternatively, open `WendysDash.sln` in Visual Studio with the **.NET desktop development** workload and **.NET Framework 4.8 targeting pack**, then build Release. Windows and shared source code stays compatible with C# 5 so the Windows script build works without a separate SDK. Linux uses .NET 10 and Avalonia; see [the Linux build instructions](docs/STEAM_DECK.md#build-on-linux).
+Alternatively, open `WendysDash.sln` in Visual Studio with the **.NET desktop development** workload and **.NET Framework 4.8 targeting pack**, then build Release. Windows source code stays compatible with C# 5 so the script build works without a separate SDK. The Linux shell script does not need building; see [the Linux testing instructions](docs/STEAM_DECK.md#testing).
 
 For UI development, after running `build.ps1 -Test`, launch:
 
@@ -77,17 +77,17 @@ This opens the real form against a temporary synthetic game folder. Its process 
 
 The dependency-free check runner covers apply and exact undo; duplicate operations; UTF-8 and BOM preservation; preservation of unrelated edits; both common newline styles; modified or duplicate patch markers; corrupt-backup protection; running-game checks; incompatible layouts; an existing inline modification; and files locked by another writer. Test fixtures contain synthetic code and are removed after the run.
 
-GitHub Actions builds and tests Windows and Linux packages on pushes and pull requests. It uploads downloadable build artifacts and a Linux GUI preview. Release publication is manual; the workflow does not create releases or upload release assets. The workflow uses the official [checkout](https://github.com/actions/checkout) and [upload-artifact](https://github.com/actions/upload-artifact) actions.
+GitHub Actions builds the Windows app and tests the Linux script on pushes and pull requests. It uploads downloadable packages for both platforms. Linux checks also verify compatibility with the Windows patch format. Release publication is manual; the workflow does not create releases or upload release assets. The workflow uses the official [checkout](https://github.com/actions/checkout) and [upload-artifact](https://github.com/actions/upload-artifact) actions.
 
 ## Publishing a release
 
 1. Push this source tree to your repository.
 2. Run `build.ps1 -Test -Package`, or download the successful build artifact from Actions.
-3. While signed in as TehLinkz, create or edit a GitHub release and attach the desired build files. Keep `WendyQuestDashPatcher.exe` directly downloadable for Windows users. Attach `WendysDash-1.1.0-linux-x64.tar.gz` and `SHA256SUMS-linux.txt` for Linux users.
+3. While signed in as TehLinkz, create or edit a GitHub release and attach the desired build files. Keep `WendyQuestDashPatcher.exe` directly downloadable for Windows users. Attach `WendysDash.sh`, `WendysDash-1.1.0-linux.tar.gz`, and `SHA256SUMS-linux.txt` for Linux users.
 4. Use [`docs/RELEASE_NOTES.md`](docs/RELEASE_NOTES.md) for Windows or [`docs/RELEASE_NOTES_LINUX.md`](docs/RELEASE_NOTES_LINUX.md) for the Linux release description.
 
 The binary is unsigned. A public publisher can add Authenticode signing with their own certificate. The source and release package contain no game code or assets.
 
 ## License
 
-[MIT](LICENSE), covering this patcher and its original icon. The Linux package includes [third-party licenses and notices](linux/THIRD_PARTY_NOTICES.md) for its bundled runtime and GUI libraries. Wendy Quest and its associated names and assets belong to their respective owners.
+[MIT](LICENSE), covering this patcher and its original icon. Wendy Quest and its associated names and assets belong to their respective owners.

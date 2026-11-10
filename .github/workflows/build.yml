@@ -36,22 +36,26 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@v6.1.0
-        with:
-          dotnet-version: '10.0.x'
-      - name: Install GUI test dependencies
+      - name: Verify the Linux script
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y xvfb libx11-6 libice6 libsm6 libfontconfig1
-      - name: Build, test, and package Linux
-        run: bash linux/package.sh
-      - name: Upload Linux package and GUI preview
+          bash -n linux/WendysDash.sh
+          python3 linux/test_script.py
+      - name: Package the Linux script
+        run: |
+          mkdir -p artifacts/WendysDash-1.1.0-linux
+          cp linux/WendysDash.sh artifacts/WendysDash.sh
+          cp linux/WendysDash.sh LICENSE docs/STEAM_DECK.md artifacts/WendysDash-1.1.0-linux/
+          chmod +x artifacts/WendysDash.sh artifacts/WendysDash-1.1.0-linux/WendysDash.sh
+          tar -C artifacts -czf artifacts/WendysDash-1.1.0-linux.tar.gz WendysDash-1.1.0-linux
+          cd artifacts
+          sha256sum WendysDash.sh WendysDash-1.1.0-linux.tar.gz > SHA256SUMS-linux.txt
+      - name: Upload Linux script and package
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: WendysDash-linux-x64
+          name: WendysDash-linux
           path: |
-            artifacts/WendysDash-1.1.0-linux-x64.tar.gz
+            artifacts/WendysDash.sh
+            artifacts/WendysDash-1.1.0-linux.tar.gz
             artifacts/SHA256SUMS-linux.txt
-            artifacts/linux-gui.png
           if-no-files-found: error
           retention-days: 30
