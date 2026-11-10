@@ -53,7 +53,7 @@ Backups remain beside `MapScene.js`, with a content hash in the filename. Apply 
 
 If manual recovery is needed, close the game and copy the desired backup over `MapScene.js`. Steam's file verification can also restore distributed game files, but may remove other local modifications.
 
-## Build
+## Build on Windows
 
 No NuGet packages or SDK downloads are needed for the script build. On a Windows machine with .NET Framework 4.8 installed, run this from the repository folder:
 
@@ -63,7 +63,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Test -Package
 
 The build script uses the Windows .NET Framework C# compiler, builds the GUI, runs the checks, and creates the release ZIP in `artifacts/`. The execution-policy override applies only to this process.
 
-Alternatively, open `WendysDash.sln` in Visual Studio with the **.NET desktop development** workload and **.NET Framework 4.8 targeting pack**, then build Release. Source code intentionally stays compatible with C# 5 so the script build works without a separate SDK.
+Alternatively, open `WendysDash.sln` in Visual Studio with the **.NET desktop development** workload and **.NET Framework 4.8 targeting pack**, then build Release. Windows and shared source code stays compatible with C# 5 so the Windows script build works without a separate SDK. Linux uses .NET 10 and Avalonia; see [the Linux build instructions](docs/STEAM_DECK.md#build-on-linux).
 
 For UI development, after running `build.ps1 -Test`, launch:
 
@@ -90,4 +90,4 @@ The binary is unsigned. A public publisher can add Authenticode signing with the
 
 ## License
 
-[MIT](LICENSE), covering this patcher and its original icon. Wendy Quest and its associated names and assets belong to their respective owners.
+[MIT](LICENSE), covering this patcher and its original icon. The Linux package includes [third-party licenses and notices](linux/THIRD_PARTY_NOTICES.md) for its bundled runtime and GUI libraries. Wendy Quest and its associated names and assets belong to their respective owners.

@@ -16,7 +16,7 @@ public sealed class MainWindow : Window
     private static readonly IBrush Red = Brush.Parse("#C62B39");
     private static readonly IBrush Muted = Brush.Parse("#6C6C73");
     private readonly PatchService service;
-    private readonly TextBox folder = new() { Watermark = "Select your Wendy Quest game folder", MinHeight = 44 };
+    private readonly TextBox folder = new() { PlaceholderText = "Select your Wendy Quest game folder", MinHeight = 44 };
     private readonly TextBlock statusTitle = new() { FontSize = 21, FontWeight = FontWeight.SemiBold };
     private readonly TextBlock statusBody = new() { FontSize = 15, TextWrapping = TextWrapping.Wrap, Foreground = Muted };
     private readonly Button apply = new() { Content = "Apply patch", Height = 48, HorizontalAlignment = HorizontalAlignment.Stretch, Background = Red, Foreground = Brushes.White };
@@ -33,7 +33,7 @@ public sealed class MainWindow : Window
         Width = 820; Height = 650; MinWidth = 600; MinHeight = 520;
         Background = Brush.Parse("#F7F6F4");
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        var root = new StackPanel { Spacing = 20, Margin = new Thickness(28) };
+        var root = new StackPanel { Spacing = 14, Margin = new Thickness(24) };
         root.Children.Add(new StackPanel { Spacing = 5, Children = {
             new TextBlock { Text = "Wendy's Dash", FontSize = 31, FontWeight = FontWeight.Bold },
             new TextBlock { Text = "FOR WENDY QUEST  /  LINUX + STEAM DECK", FontSize = 13, Foreground = Red, FontWeight = FontWeight.SemiBold },
@@ -146,7 +146,7 @@ public sealed class MainWindow : Window
     }
     private void Log(string message) { log.AppendLine(DateTime.Now.ToString("HH:mm:ss") + "  " + message); activity.Text = log.ToString(); }
     private static TextBlock Text(string text, double size = 15) => new() { Text = text, FontSize = size, Foreground = Muted, TextWrapping = TextWrapping.Wrap };
-    private static Border Card(Control child) => new() { Background = Brushes.White, BorderBrush = Brush.Parse("#E2DFDB"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(7), Padding = new Thickness(20), Child = child };
+    private static Border Card(Control child) => new() { Background = Brushes.White, BorderBrush = Brush.Parse("#E2DFDB"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(7), Padding = new Thickness(16), Child = child };
 
     internal void VerifyAndCapture(SmokeFixture fixture, string output)
     {
