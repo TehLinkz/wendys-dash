@@ -1,0 +1,152 @@
+name: Publish Wendy's Dash v1.1.0
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-v1.1.0.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-wendys-dash-v1.1.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'TehLinkz/wendys-dash' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN: '42745502136'
+      BUILD_SHA: '22f37ec3baae5dd318ac05abbe272b7b1687dbeb'
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: '22f37ec3baae5dd318ac05abbe272b7b1687dbeb'
+          persist-credentials: false
+      - name: Download the verified build
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="$(gh api "repos/$GH_REPO/actions/runs/$BUILD_RUN" --jq '[.conclusion, .head_sha] | join(" ")')"
+          test "$result" = "success $BUILD_SHA"
+          gh run download "$BUILD_RUN" --name WendysDash-windows --dir artifacts/windows
+          gh run download "$BUILD_RUN" --name WendysDash-linux --dir artifacts/linux
+      - name: Verify packages and publish the release
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import subprocess
+          import zipfile
+
+          repo = os.environ["GH_REPO"]
+          expected_sha = os.environ["BUILD_SHA"]
+          tag = "v1.1.0"
+          stage = Path("release")
+          stage.mkdir(exist_ok=True)
+
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def gh(*args):
+              return subprocess.check_output(["gh", *args], text=True).strip()
+
+          def api(path):
+              return json.loads(gh("api", "repos/" + repo + "/" + path))
+
+          def verify_tag():
+              for ref in api("git/matching-refs/tags/" + tag):
+                  if ref["ref"] != "refs/tags/" + tag:
+                      continue
+                  obj = ref["object"]
+                  while obj["type"] == "tag":
+                      obj = api("git/tags/" + obj["sha"])["object"]
+                  if obj["type"] != "commit" or obj["sha"] != expected_sha:
+                      raise RuntimeError("Existing release tag points at an unexpected commit.")
+
+          verify_tag()
+
+          windows = Path("artifacts/windows")
+          linux = Path("artifacts/linux")
+          exe = windows / "WendyQuestDashPatcher.exe"
+          if exe.read_bytes()[:2] != b"MZ":
+              raise RuntimeError("Windows executable signature is missing.")
+          with zipfile.ZipFile(windows / "WendysDash-1.0.0-win.zip") as archive:
+              if archive.read("WendyQuestDashPatcher.exe") != exe.read_bytes():
+                  raise RuntimeError("Windows EXE and packaged EXE differ.")
+              expected = archive.read("SHA256SUMS.txt").decode("utf-8-sig").split()[0]
+              if digest(exe) != expected:
+                  raise RuntimeError("Windows checksum mismatch.")
+          for line in (linux / "SHA256SUMS-linux.txt").read_text().splitlines():
+              expected, name = line.split(maxsplit=1)
+              if name not in {"WendysDash.sh", "WendysDash-1.1.0-linux.tar.gz"}:
+                  raise RuntimeError("Unexpected Linux checksum entry.")
+              if digest(linux / name) != expected:
+                  raise RuntimeError("Linux checksum mismatch: " + name)
+          if (linux / "WendysDash.sh").read_bytes() != Path("linux/WendysDash.sh").read_bytes():
+              raise RuntimeError("Linux artifact differs from the tested source.")
+
+          sources = [
+              exe,
+              windows / "WendysDash-1.0.0-win.zip",
+              linux / "WendysDash.sh",
+              linux / "WendysDash-1.1.0-linux.tar.gz",
+              linux / "SHA256SUMS-linux.txt",
+          ]
+          for source in sources:
+              shutil.copyfile(source, stage / source.name)
+          sums = "".join(digest(stage / p.name) + "  " + p.name + "\n" for p in sources)
+          (stage / "SHA256SUMS.txt").write_text(sums)
+          files = sorted(stage.iterdir())
+
+          def find_release():
+              return next((r for r in api("releases?per_page=100") if r["tag_name"] == tag), None)
+
+          release = find_release()
+          if release is None:
+              gh("release", "create", tag, "--draft", "--target", expected_sha,
+                 "--title", "Wendy's Dash v1.1.0",
+                 "--notes-file", "docs/RELEASE_NOTES_LINUX.md")
+              release = find_release()
+          if release is None or release["target_commitish"] != expected_sha:
+              raise RuntimeError("Release points at an unexpected commit; refusing to change it.")
+          assets = {a["name"]: a for a in release["assets"]}
+          for path in files:
+              asset = assets.get(path.name)
+              if asset is not None:
+                  if asset.get("digest") != "sha256:" + digest(path):
+                      raise RuntimeError("Existing release asset differs: " + path.name)
+              elif release["draft"]:
+                  gh("release", "upload", tag, str(path))
+              else:
+                  raise RuntimeError("Published release is missing an expected asset; refusing to alter it.")
+
+          release = find_release()
+          assets = {a["name"]: a for a in release["assets"]}
+          if set(assets) != {p.name for p in files}:
+              raise RuntimeError("Unexpected release asset list.")
+          for path in files:
+              asset = assets[path.name]
+              if asset["size"] != path.stat().st_size or asset.get("digest") != "sha256:" + digest(path):
+                  raise RuntimeError("Uploaded asset verification failed: " + path.name)
+          if release["draft"]:
+              gh("release", "edit", tag, "--draft=false", "--latest")
+          result = find_release()
+          if result["draft"]:
+              raise RuntimeError("Release is still a draft.")
+          verify_tag()
+          print("Published and verified: " + result["html_url"])
+          PY
+

@@ -17,9 +17,9 @@ The application runs locally. It has no installer, telemetry, or network request
 
 ## Linux and Steam Deck
 
-Download the single-file [`WendysDash.sh`](https://raw.githubusercontent.com/TehLinkz/wendys-dash/main/linux/WendysDash.sh) script. In Steam Deck's Desktop Mode, run `bash ~/Downloads/WendysDash.sh` from Konsole, then choose **Apply patch**. It uses system Python 3 and KDialog/Zenity for simple dialogs, with text prompts as a fallback. No .NET bundle or extra Python packages are needed.
+Download the single-file [`WendysDash.sh`](https://github.com/TehLinkz/wendys-dash/releases/latest/download/WendysDash.sh) script from [Releases](https://github.com/TehLinkz/wendys-dash/releases). In Steam Deck's Desktop Mode, run `bash ~/Downloads/WendysDash.sh` from Konsole, then choose **Apply patch**. It uses system Python 3 and KDialog/Zenity for simple dialogs, with text prompts as a fallback. No .NET bundle or extra Python packages are needed.
 
-A packaged script with instructions and checksums is also available in the successful **WendysDash-linux** artifact on [Actions](https://github.com/TehLinkz/wendys-dash/actions). See [the Steam Deck guide](docs/STEAM_DECK.md) for details. Automated tests run on Ubuntu; physical Steam Deck testing is still needed. Release publication is manual so the publisher can be **TehLinkz**.
+A packaged script with instructions and checksums is also available on Releases. Development builds are available as **WendysDash-linux** artifacts on [Actions](https://github.com/TehLinkz/wendys-dash/actions). See [the Steam Deck guide](docs/STEAM_DECK.md) for details. Automated tests run on Ubuntu; physical Steam Deck testing is still needed.
 
 ## Features
 
@@ -77,7 +77,7 @@ This opens the real form against a temporary synthetic game folder. Its process 
 
 The dependency-free check runner covers apply and exact undo; duplicate operations; UTF-8 and BOM preservation; preservation of unrelated edits; both common newline styles; modified or duplicate patch markers; corrupt-backup protection; running-game checks; incompatible layouts; an existing inline modification; and files locked by another writer. Test fixtures contain synthetic code and are removed after the run.
 
-GitHub Actions builds the Windows app and tests the Linux script on pushes and pull requests. It uploads downloadable packages for both platforms. Linux checks also verify compatibility with the Windows patch format. Release publication is manual; the workflow does not create releases or upload release assets. The workflow uses the official [checkout](https://github.com/actions/checkout) and [upload-artifact](https://github.com/actions/upload-artifact) actions.
+GitHub Actions builds the Windows app and tests the Linux script on pushes and pull requests. It uploads downloadable packages for both platforms. Linux checks also verify compatibility with the Windows patch format. The build workflow has read-only repository access. A separate version-specific publishing workflow promotes the verified v1.1.0 build to Releases, with checksums checked before publication. Releases published by that workflow show **github-actions** as the publisher. The workflows use the official [checkout](https://github.com/actions/checkout) and [upload-artifact](https://github.com/actions/upload-artifact) actions.
 
 ## Publishing a release
 
