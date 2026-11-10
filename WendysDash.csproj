@@ -23,7 +23,7 @@
     <Reference Include="System" /><Reference Include="System.Core" />
     <Reference Include="System.Drawing" /><Reference Include="System.Windows.Forms" />
     <Compile Include="src\AssemblyInfo.cs" /><Compile Include="src\Program.cs" />
-    <Compile Include="src\PatchService.cs" /><Compile Include="src\SteamLocator.cs" /><Compile Include="src\MainForm.cs" />
+    <Compile Include="src\PatchService.cs" /><Compile Include="src\GameProcessGuard.cs" /><Compile Include="src\SteamLocator.cs" /><Compile Include="src\MainForm.cs" />
     <None Include="src\App.config" /><None Include="src\app.manifest" />
     <None Include="assets\app.ico" />
   </ItemGroup>

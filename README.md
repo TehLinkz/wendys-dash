@@ -1,6 +1,6 @@
 # Wendy's Dash
 
-A small Windows utility that adds **hold-to-run controls** to Wendy Quest. Hold **X** on an Xbox controller or **Shift** on a keyboard to move at twice the normal walking speed. Release to walk again.
+A small Windows and Linux utility that adds **hold-to-run controls** to Wendy Quest. Hold **X** on an Xbox controller or **Shift** on a keyboard to move at twice the normal walking speed. Release to walk again.
 
 An unofficial community project. Not affiliated with or endorsed by Wendy's or the game's creators.
 
@@ -13,7 +13,13 @@ An unofficial community project. Not affiliated with or endorsed by Wendy's or t
 
 To remove the change, close the game, reopen the patcher, and click **Undo patch**.
 
-The application runs locally. It has no installer, telemetry, network requests, or third-party runtime packages.
+The application runs locally. It has no installer, telemetry, or network requests. The Linux archive includes .NET and the Avalonia GUI libraries.
+
+## Linux and Steam Deck
+
+A native Linux x86-64 build is available from the successful **WendysDash-linux-x64** artifact on the repository's [Actions page](https://github.com/TehLinkz/wendys-dash/actions). It is packaged as `WendysDash-1.1.0-linux-x64.tar.gz`, with the .NET runtime included. Use it in Steam Deck's Desktop Mode. See [the Steam Deck guide](docs/STEAM_DECK.md) for extraction, launch, and SD-card instructions.
+
+The Linux GUI is tested on Ubuntu CI. Physical Steam Deck testing is still needed. Release publication is manual so the publisher can be **TehLinkz**.
 
 ## Features
 
@@ -71,14 +77,14 @@ This opens the real form against a temporary synthetic game folder. Its process 
 
 The dependency-free check runner covers apply and exact undo; duplicate operations; UTF-8 and BOM preservation; preservation of unrelated edits; both common newline styles; modified or duplicate patch markers; corrupt-backup protection; running-game checks; incompatible layouts; an existing inline modification; and files locked by another writer. Test fixtures contain synthetic code and are removed after the run.
 
-GitHub Actions builds, tests, and uploads the portable ZIP on pushes and pull requests. The first successful push to `main` also publishes `v1.0.0`, including the directly downloadable executable. If that release already exists, the workflow leaves it unchanged. Pull requests never publish releases. The workflow uses the official [checkout](https://github.com/actions/checkout) and [upload-artifact](https://github.com/actions/upload-artifact) actions.
+GitHub Actions builds and tests Windows and Linux packages on pushes and pull requests. It uploads downloadable build artifacts and a Linux GUI preview. Release publication is manual; the workflow does not create releases or upload release assets. The workflow uses the official [checkout](https://github.com/actions/checkout) and [upload-artifact](https://github.com/actions/upload-artifact) actions.
 
 ## Publishing a release
 
 1. Push this source tree to your repository.
 2. Run `build.ps1 -Test -Package`, or download the successful build artifact from Actions.
-3. The initial push to `main` publishes `v1.0.0` automatically after all checks pass. For manual publication, attach `WendyQuestDashPatcher.exe`, `WendysDash-1.0.0-win.zip`, and `SHA256SUMS.txt` to the release.
-4. Use [`docs/RELEASE_NOTES.md`](docs/RELEASE_NOTES.md) for the release description.
+3. While signed in as TehLinkz, create or edit a GitHub release and attach the desired build files. Keep `WendyQuestDashPatcher.exe` directly downloadable for Windows users. Attach `WendysDash-1.1.0-linux-x64.tar.gz` and `SHA256SUMS-linux.txt` for Linux users.
+4. Use [`docs/RELEASE_NOTES.md`](docs/RELEASE_NOTES.md) for Windows or [`docs/RELEASE_NOTES_LINUX.md`](docs/RELEASE_NOTES_LINUX.md) for the Linux release description.
 
 The binary is unsigned. A public publisher can add Authenticode signing with their own certificate. The source and release package contain no game code or assets.
 

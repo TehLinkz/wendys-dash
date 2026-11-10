@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Text;
+#if !LINUX_TESTS
 using System.Windows.Forms;
+#endif
 using WendysDash;
 
 internal static class PatchServiceTests
@@ -15,6 +17,7 @@ internal static class PatchServiceTests
     {
         try
         {
+#if !LINUX_TESTS
             if (args.Length == 1 && args[0] == "--ui")
             {
                 using (Fixture f = new Fixture(Map)) {
@@ -24,6 +27,7 @@ internal static class PatchServiceTests
                 }
                 return 0;
             }
+#endif
             Test("apply, backup, repeat apply, and exact undo", delegate {
                 using (Fixture f = new Fixture(Map)) {
                     PatchResult applied = f.Service.Apply(f.Root);
@@ -98,7 +102,7 @@ internal static class PatchServiceTests
             });
             Test("unsupported engine and missing files are refused", delegate {
                 using (Fixture f = new Fixture(Map)) {
-                    File.WriteAllText(Path.Combine(f.Root, @"package.nw\js\rmmz_objects.js"), "different engine");
+                    File.WriteAllText(Path.Combine(f.Root, "package.nw", "js", "rmmz_objects.js"), "different engine");
                     Check(f.Service.Inspect(f.Root).State == PatchState.Unsupported, "Unsupported engine accepted");
                     ExpectFailure(delegate { f.Service.Apply(f.Root); });
                     Check(f.Service.Inspect(Path.Combine(f.Root, "missing")).State == PatchState.Missing, "Missing folder accepted");
@@ -119,7 +123,10 @@ internal static class PatchServiceTests
                     Check(File.ReadAllText(f.Target) == Map, "Locked file changed");
                 }
             });
-            Console.WriteLine("Passed " + passed + " checks.");
+#if LINUX_TESTS
+            LinuxTests.Run();
+#endif
+            Console.WriteLine("Passed " + passed + " shared patch checks.");
             return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }
@@ -143,11 +150,11 @@ internal static class PatchServiceTests
         {
             parent = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "WendysDash.Tests"));
             Root = Path.Combine(parent, Guid.NewGuid().ToString("N"));
-            Target = Path.Combine(Root, @"package.nw\js\plugins\MapScene.js");
+            Target = Path.Combine(Root, "package.nw", "js", "plugins", "MapScene.js");
             Directory.CreateDirectory(Path.GetDirectoryName(Target));
             File.WriteAllText(Target, source, new UTF8Encoding(false));
-            File.WriteAllText(Path.Combine(Root, @"package.nw\js\rmmz_objects.js"), Engine);
-            File.WriteAllText(Path.Combine(Root, @"package.nw\js\plugins\InputAdjustments.js"), "// synthetic input file");
+            File.WriteAllText(Path.Combine(Root, "package.nw", "js", "rmmz_objects.js"), Engine);
+            File.WriteAllText(Path.Combine(Root, "package.nw", "js", "plugins", "InputAdjustments.js"), "// synthetic input file");
         }
         public void Dispose()
         {

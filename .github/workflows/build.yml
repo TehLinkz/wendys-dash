@@ -12,8 +12,6 @@ jobs:
   windows:
     runs-on: windows-latest
     timeout-minutes: 10
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -21,30 +19,39 @@ jobs:
       - name: Build, verify, and package
         shell: powershell
         run: .\build.ps1 -Test -Package
-      - name: Upload portable release
+      - name: Upload Windows files
         uses: actions/upload-artifact@v7.0.2
         with:
           name: WendysDash-windows
-          path: artifacts/WendysDash-1.0.0-win.zip
+          path: |
+            artifacts/WendyQuestDashPatcher.exe
+            artifacts/WendysDash-1.0.0-win.zip
           if-no-files-found: error
           retention-days: 30
-      - name: Publish v1.0.0 if it does not exist
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
+
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install GUI test dependencies
         run: |
-          gh release view v1.0.0 --json id *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host 'v1.0.0 already exists; published files are left unchanged.'
-            exit 0
-          }
-          gh release create v1.0.0 `
-            artifacts/WendyQuestDashPatcher.exe `
-            artifacts/WendysDash-1.0.0-win.zip `
-            artifacts/WendysDash-1.0.0-win/SHA256SUMS.txt `
-            --target $env:GITHUB_SHA `
-            --title "Wendy's Dash v1.0.0" `
-            --notes-file docs/RELEASE_NOTES.md
-          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed.' }
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libx11-6 libice6 libsm6 libfontconfig1
+      - name: Build, test, and package Linux
+        run: bash linux/package.sh
+      - name: Upload Linux package and GUI preview
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: WendysDash-linux-x64
+          path: |
+            artifacts/WendysDash-1.1.0-linux-x64.tar.gz
+            artifacts/SHA256SUMS-linux.txt
+            artifacts/linux-gui.png
+          if-no-files-found: error
+          retention-days: 30

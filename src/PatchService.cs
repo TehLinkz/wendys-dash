@@ -58,10 +58,7 @@ namespace WendysDash
 
         public static bool IsGameRunning()
         {
-            Process[] processes = Process.GetProcessesByName("WendyQuest");
-            bool running = processes.Length > 0;
-            foreach (Process process in processes) process.Dispose();
-            return running;
+            return GameProcessGuard.IsGameRunning();
         }
 
         public PatchInfo Inspect(string folder)
@@ -71,9 +68,9 @@ namespace WendysDash
             info.Message = "Choose your Wendy Quest installation folder.";
             if (String.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return info;
             string root = Path.GetFullPath(folder);
-            info.TargetPath = Path.Combine(root, @"package.nw\js\plugins\MapScene.js");
-            string objects = Path.Combine(root, @"package.nw\js\rmmz_objects.js");
-            string input = Path.Combine(root, @"package.nw\js\plugins\InputAdjustments.js");
+            info.TargetPath = Path.Combine(root, "package.nw", "js", "plugins", "MapScene.js");
+            string objects = Path.Combine(root, "package.nw", "js", "rmmz_objects.js");
+            string input = Path.Combine(root, "package.nw", "js", "plugins", "InputAdjustments.js");
             if (!File.Exists(info.TargetPath) || !File.Exists(objects) || !File.Exists(input))
             {
                 info.Message = "Select the game folder containing package.nw.";

@@ -18,7 +18,7 @@ Copy-Item -LiteralPath (Join-Path $root 'src\App.config') -Destination ($exe + '
 Write-Host "Built: $exe"
 if ($Test) {
     $testExe = Join-Path $out 'WendysDash.Tests.exe'
-    & $compiler /nologo /target:exe /platform:anycpu /optimize+ /langversion:5 /warn:4 /warnaserror+ "/out:$testExe" /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Join-Path $root 'src\PatchService.cs') (Join-Path $root 'src\SteamLocator.cs') (Join-Path $root 'src\MainForm.cs') (Join-Path $root 'tests\PatchServiceTests.cs')
+    & $compiler /nologo /target:exe /platform:anycpu /optimize+ /langversion:5 /warn:4 /warnaserror+ "/out:$testExe" /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Join-Path $root 'src\PatchService.cs') (Join-Path $root 'src\GameProcessGuard.cs') (Join-Path $root 'src\SteamLocator.cs') (Join-Path $root 'src\MainForm.cs') (Join-Path $root 'tests\PatchServiceTests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Test build failed.' }
     & $testExe
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
