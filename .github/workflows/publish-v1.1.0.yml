@@ -63,8 +63,8 @@ jobs:
           def gh(*args):
               return subprocess.check_output(["gh", *args], text=True).strip()
 
-          def api(path):
-              return json.loads(gh("api", "repos/" + repo + "/" + path))
+          def api(path, *args):
+              return json.loads(gh("api", "repos/" + repo + "/" + path, *args))
 
           def verify_tag():
               for ref in api("git/matching-refs/tags/" + tag):
@@ -116,10 +116,11 @@ jobs:
 
           release = find_release()
           if release is None:
-              gh("release", "create", tag, "--draft", "--target", expected_sha,
-                 "--title", "Wendy's Dash v1.1.0",
-                 "--notes-file", "docs/RELEASE_NOTES_LINUX.md")
-              release = find_release()
+              request = {"tag_name": tag, "draft": True, "target_commitish": expected_sha,
+                         "name": "Wendy's Dash v1.1.0",
+                         "body": Path("docs/RELEASE_NOTES_LINUX.md").read_text()}
+              Path("release-request.json").write_text(json.dumps(request))
+              release = api("releases", "--method", "POST", "--input", "release-request.json")
           if release is None or release["target_commitish"] != expected_sha:
               raise RuntimeError("Release points at an unexpected commit; refusing to change it.")
           assets = {a["name"]: a for a in release["assets"]}
@@ -133,7 +134,7 @@ jobs:
               else:
                   raise RuntimeError("Published release is missing an expected asset; refusing to alter it.")
 
-          release = find_release()
+          release = api("releases/" + str(release["id"]))
           assets = {a["name"]: a for a in release["assets"]}
           if set(assets) != {p.name for p in files}:
               raise RuntimeError("Unexpected release asset list.")
@@ -143,7 +144,7 @@ jobs:
                   raise RuntimeError("Uploaded asset verification failed: " + path.name)
           if release["draft"]:
               gh("release", "edit", tag, "--draft=false", "--latest")
-          result = find_release()
+          result = api("releases/" + str(release["id"]))
           if result["draft"]:
               raise RuntimeError("Release is still a draft.")
           verify_tag()
