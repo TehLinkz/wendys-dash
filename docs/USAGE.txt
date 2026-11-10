@@ -1,0 +1,23 @@
+WENDY'S DASH 1.0.0
+
+1. Extract this ZIP and close Wendy Quest.
+2. Open WendyQuestDashPatcher.exe.
+3. Confirm the game folder, or choose it with Browse.
+4. Click Apply patch, then launch the game normally.
+
+Hold Xbox X or keyboard Shift to move at twice walking speed.
+Release the button to walk again.
+
+UNDO
+Close the game, open the patcher, and click Undo patch.
+The app saves and verifies a backup before each change.
+View activity shows the backup paths. Save files are untouched.
+
+REQUIREMENTS
+Windows, .NET Framework 4.8 or newer, and the Windows Steam game.
+No installer or internet access is required by the patcher.
+Steam updates may replace the patched file; reapply when needed.
+
+This is an unofficial community utility, not an official game update.
+The executable is unsigned. No game files or assets are included.
+See LICENSE for the patcher's MIT license.
